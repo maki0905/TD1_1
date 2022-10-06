@@ -1,8 +1,10 @@
 ﻿#include <Novice.h>
-#include <main.h>
 #define _USE_MATH_DEFINES
 #include <math.h> 
 #include <stdlib.h>
+#include <main.h>
+#include <collision.h>
+
 
 const char kWindowTitle[] = "LC1A_21_マキユキノリ_タイトル";
 
@@ -38,7 +40,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			player.possition.x += player.velocity.x;
 		}
 
-		
+		for (int num = 0; num < 10; num++) {
+			if (circle[num].isactive == 1) {
+				circle[num].possition.x += circle[num].velocity.x;
+				circle[num].possition.y += circle[num].velocity.y;
+			}
+		}
 
 		///
 		/// ↓更新処理ここから
@@ -50,8 +57,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				if (circle[num].isactive == 0) {
 					circle[num].possition.x = mausepossition.x;
 					circle[num].possition.y = mausepossition.y;
-					circle[num].velocity.x = rand() % 10 - 9;
-					circle[num].velocity.y = rand() % 10 - 9;
+					circle[num].width.x = 50;
+					circle[num].width.y = 50;
+					circle[num].velocity.x = rand() % 10 - 4;
+					circle[num].velocity.y = rand() % 10 - 4;
 					circle[num].isactive = 1;
 					break;
 				}
@@ -63,10 +72,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if (circle[num].isactive == 1) {
 				float a = player.possition.x - circle[num].possition.x;
 				float b = player.possition.y - circle[num].possition.y;
-				if ((a * a) + (b * b) <= 50 * 50) {
-					circle[num].velocity.x *= -1;
-					circle[num].velocity.y *= -1;
+				float len = 0;
+				if (circlecollision(player.possition.x, player.possition.y, player.width.x, circle[num].possition.x, circle[num].possition.y, circle[num].width.x) == 1) {
+					len = sqrtf(a * a + b * b);
+					float distance = player.width.x + circle[num].width.x - len;
+					if (len > 0) {
+						len = 1 / len;
+						a *= len;
+						b *= len;
+
+						player.possition.x += a * (distance / 2);
+						player.possition.y += b * (distance / 2);
+						circle[num].possition.x -= a * (distance / 2);
+						circle[num].possition.y -= b * (distance / 2);
+
+						
+					}
+
+					
 				}
+				
 				if (circle[num].possition.x <= 50 || circle[num].possition.x >= 1230) {
 					circle[num].velocity.x *= -1;
 				}
@@ -76,12 +101,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}
 		}
 
-		for (int num = 0; num < 10; num++) {
-			if (circle[num].isactive == 1) {
-				circle[num].possition.x += circle[num].velocity.x;
-				circle[num].possition.y += circle[num].velocity.y;
-			}
-		}
+		
 
 
 		///
